@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Copy, Download, ExternalLink, Heart } from 'lucide-react'
+import { supabase } from '../supabaseClient'
 
 const CARD_WIDTH = 1080
 const CARD_HEIGHT = 1350
@@ -91,12 +92,27 @@ export default function InvitationGenerator() {
     document.fonts.ready.then(() => drawInvitation(canvasRef.current!, generatedName))
   }, [generatedName])
 
-  const generate = (event: React.FormEvent) => {
+    const generate = async (event: React.FormEvent) => {
     event.preventDefault()
     const cleanedName = guestName.trim().replace(/\s+/g, ' ')
     if (!cleanedName) return
+    
     setGeneratedName(cleanedName)
     setCopied(false)
+
+    // --- NEW CODE: Save to Supabase ---
+    const currentUrl = window.location.origin + window.location.pathname.replace(/\/generator\/?$/, '/') + '?guest=' + encodeURIComponent(cleanedName);
+    
+    const { error } = await supabase
+      .from('invitations')
+      .insert([{ guest_name: cleanedName, invite_link: currentUrl, rsvp_status: 'pending' }])
+
+    if (error) {
+      console.error('Error saving invitation:', error)
+    } else {
+      console.log('Invitation saved to database!')
+    }
+    // ------------------------------------
   }
 
   const copyLink = async () => {

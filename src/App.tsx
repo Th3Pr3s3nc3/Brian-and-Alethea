@@ -11,6 +11,7 @@ import RSVPForm from './components/RSVPForm'
 import Footer from './components/Footer'
 import MusicToggle from './components/MusicToggle'
 import InvitationGenerator from './components/InvitationGenerator'
+import AdminDashboard from './components/AdminDashboard'
 import './index.css'
 
 function App() {
@@ -18,6 +19,9 @@ function App() {
 
   if (window.location.pathname.replace(/\/$/, '') === '/generator' || searchParams.has('generator')) {
     return <InvitationGenerator />
+  }
+    if (window.location.pathname.replace(/\/$/, '') === '/admin' || searchParams.has('admin')) {
+    return <AdminDashboard />
   }
 
   const guestName = searchParams.get('guest')?.trim() || ''

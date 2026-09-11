@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { supabase } from '../supabaseClient'
 
 interface RSVPFormProps {
   guestName?: string
@@ -20,9 +21,25 @@ export default function RSVPForm({ guestName = '' }: RSVPFormProps) {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitted(true)
+    
+    // Determine the status based on what they clicked
+    const status = formData.attending === 'Joyfully Accept' ? 'attending' : 'declined'
+    
+    // Update the database
+    const { error } = await supabase
+      .from('invitations')
+      .update({ rsvp_status: status })
+      .eq('guest_name', guestName) // This finds the correct guest in your database
+
+    if (error) {
+      console.error('Error updating RSVP:', error)
+      alert('There was an error saving your response. Please try again.')
+    } else {
+      console.log('RSVP updated successfully!')
+      setIsSubmitted(true) // Show the success screen only after it saves
+    }
   }
 
   return (
